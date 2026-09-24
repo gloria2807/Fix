@@ -11,20 +11,23 @@ type Progress = {
 };
 
 export async function GET(
-    request: Request,
-    context: {
+    _request: Request,
+    {
+        params,
+    }: {
         params: Promise<{
             runId: string;
         }>;
     },
 ) {
     try {
-        const { runId } = await context.params;
+        const { runId } = await params;
 
         if (!runId) {
             return NextResponse.json(
                 {
-                    error: 'Run ID is required.',
+                    error:
+                        'Run ID is required.',
                 },
                 { status: 400 },
             );
@@ -40,9 +43,6 @@ export async function GET(
             );
         }
 
-        /*
-         * Get the current Apify Actor run.
-         */
         const run = await client
             .run(runId)
             .get();
@@ -57,12 +57,6 @@ export async function GET(
             );
         }
 
-        /*
-         * Read the tiny progress record.
-         *
-         * This is intentionally much lighter
-         * than reading the entire Actor log.
-         */
         const progressRecord =
             await client
                 .run(runId)
@@ -77,13 +71,7 @@ export async function GET(
                 sources: 0,
             };
 
-        /*
-         * Actor finished successfully.
-         */
         if (run.status === 'SUCCEEDED') {
-            /*
-             * First try the OUTPUT key-value record.
-             */
             const outputRecord =
                 await client
                     .run(runId)
@@ -103,18 +91,18 @@ export async function GET(
                 });
             }
 
-            /*
-             * Fallback to the default dataset.
-             */
             if (run.defaultDatasetId) {
-                const { items } =
-                    await client
-                        .dataset(
-                            run.defaultDatasetId,
-                        )
-                        .listItems();
+                const {
+                    items,
+                } = await client
+                    .dataset(
+                        run.defaultDatasetId,
+                    )
+                    .listItems();
 
-                if (items.length > 0) {
+                if (
+                    items.length > 0
+                ) {
                     return NextResponse.json({
                         status: 'SUCCEEDED',
                         progress: {
@@ -122,7 +110,8 @@ export async function GET(
                             sources:
                                 progress.sources,
                         },
-                        result: items[0],
+                        result:
+                            items[0],
                     });
                 }
             }
@@ -136,9 +125,6 @@ export async function GET(
             );
         }
 
-        /*
-         * Actor failed or was stopped.
-         */
         if (
             run.status === 'FAILED' ||
             run.status === 'ABORTED' ||
@@ -154,9 +140,6 @@ export async function GET(
             });
         }
 
-        /*
-         * Actor is still running.
-         */
         return NextResponse.json({
             status: run.status,
             progress,

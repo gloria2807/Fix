@@ -11,7 +11,16 @@ export interface FixInput {
     equipment?: EquipmentType;
     model?: string;
     location?: string;
-    imageUrl?: string;
+
+    /*
+     * Optional image captured or selected by
+     * the user in the browser.
+     *
+     * The image is kept temporarily in the
+     * current browser session and sent to FIX
+     * as a compressed data URL.
+     */
+    imageData?: string;
 }
 
 export interface ResearchSource {
@@ -24,6 +33,14 @@ export interface ResearchSource {
         | 'repair'
         | 'product'
         | 'local';
+}
+
+export interface VisualAnalysis {
+    equipment: string;
+    model: string;
+    confidence: number;
+    visibleSymptoms: string[];
+    visualClues: string[];
 }
 
 export interface Diagnosis {

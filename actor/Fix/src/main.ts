@@ -42,14 +42,6 @@ try {
         'FIX AGENT starting.',
     );
 
-    /*
-     * ----------------------------------------
-     * STEP 1
-     * Understand the problem and determine
-     * what information FIX needs.
-     * ----------------------------------------
-     */
-
     await setProgress(
         'identifying',
     );
@@ -60,6 +52,12 @@ try {
             ? input.equipment
             : 'unknown';
 
+    if (input.imageData) {
+        log.info(
+            'FIX AGENT received an image for visual analysis.',
+        );
+    }
+
     const plan =
         await planResearch({
             problem:
@@ -67,18 +65,21 @@ try {
             equipment,
             model:
                 input.model,
+            imageData:
+                input.imageData,
         });
+
+    if (plan.visualAnalysis) {
+        log.info(
+            `FIX AGENT visual analysis: ${JSON.stringify(
+                plan.visualAnalysis,
+            )}`,
+        );
+    }
 
     log.info(
         `FIX AGENT selected ${plan.searches.length} research queries.`,
     );
-
-    /*
-     * ----------------------------------------
-     * STEP 2
-     * Research the actual problem.
-     * ----------------------------------------
-     */
 
     await setProgress(
         'researching',
@@ -93,21 +94,10 @@ try {
         `FIX AGENT found ${sources.length} research sources.`,
     );
 
-    /*
-     * The research has been retrieved.
-     */
-
     await setProgress(
         'documentation',
         sources.length,
     );
-
-    /*
-     * ----------------------------------------
-     * STEP 3
-     * Evaluate the evidence.
-     * ----------------------------------------
-     */
 
     await setProgress(
         'evaluating',
@@ -121,15 +111,10 @@ try {
             equipment,
             model:
                 input.model,
+            visualAnalysis:
+                plan.visualAnalysis,
             sources,
         });
-
-    /*
-     * ----------------------------------------
-     * STEP 4
-     * Select the safest first action.
-     * ----------------------------------------
-     */
 
     await setProgress(
         'sufficient',
@@ -146,28 +131,14 @@ try {
         sources,
     };
 
-    /*
-     * Save the final result to the dataset.
-     */
-
     await Actor.pushData(
         output,
     );
-
-    /*
-     * Also save it to the run's Key-Value
-     * Store so the web app can retrieve it
-     * quickly.
-     */
 
     await Actor.setValue(
         'OUTPUT',
         output,
     );
-
-    /*
-     * Tell the frontend that FIX is finished.
-     */
 
     await setProgress(
         'complete',
@@ -182,10 +153,6 @@ try {
         error as Error,
         'FIX AGENT failed.',
     );
-
-    /*
-     * Tell the frontend that the run failed.
-     */
 
     await Actor.setValue(
         'PROGRESS',

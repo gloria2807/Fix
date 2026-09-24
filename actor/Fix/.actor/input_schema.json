@@ -39,12 +39,10 @@
       "default": "Lagos, Nigeria",
       "editor": "textfield"
     },
-    "imageUrl": {
-      "title": "Image URL",
+    "imageData": {
+      "title": "Image data",
       "type": "string",
-      "description": "Optional public URL of an image of the equipment.",
-      "default": "",
-      "editor": "textfield"
+      "description": "Temporary image data supplied by the FIX web app."
     }
   },
   "required": [
