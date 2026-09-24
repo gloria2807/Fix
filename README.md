@@ -414,9 +414,11 @@ Instead of returning a page of search results, FIX presents the most useful star
 
 The result includes the recommended first action, likely causes, troubleshooting steps, follow-up questions and supporting sources.
 
-Check out the video demo:
-![FIX demo](./screenshots/FIX-Product-Film.mp4)
+## Product Demo
 
+See FIX in action:
+
+**[▶ Watch the FIX product film](./screenshots/FIX-Product-Film.mp4)**
 ---
 
 # Project Links
