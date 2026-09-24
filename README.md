@@ -416,9 +416,9 @@ The result includes the recommended first action, likely causes, troubleshooting
 
 ## Product Demo
 
-See FIX in action:
+Check out FIX in action:
 
-**[▶ Watch the FIX product film](./screenshots/FIX-Product-Film.mp4)**
+<video src="https://raw.githubusercontent.com/gloria2807/fix/main/screenshots/FIX-Product-Film.mp4" controls width="100%"></video>
 ---
 
 # Project Links
