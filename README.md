@@ -6,7 +6,14 @@
 
 Describe what is wrong. Show FIX the equipment if you have a photo. FIX researches relevant technical information, reasons over the evidence, and gives you a practical first action to try.
 
-[Demo](https://fix.example.com) · [Apify Actor](https://apify.com/) · [GitHub](https://github.com/)
+[Video Demo] 
+
+https://github.com/user-attachments/assets/5c9574ee-a6e2-4471-a738-c23b9e0c3590
+
+
+
+
+
 
 ---
 
@@ -413,12 +420,6 @@ Instead of returning a page of search results, FIX presents the most useful star
 > **What should I do next?**
 
 The result includes the recommended first action, likely causes, troubleshooting steps, follow-up questions and supporting sources.
-
-## Product Demo
-
-Check out FIX in action:
-
-<video src="./screenshots/FIX-Product-Film.mp4" controls width="100%"></video>
 ---
 
 # Project Links
