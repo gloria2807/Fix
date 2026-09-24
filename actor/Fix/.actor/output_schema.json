@@ -1,12 +1,12 @@
 {
   "actorOutputSchemaVersion": 1,
   "title": "FIX Troubleshooting Diagnosis",
-  "description": "The troubleshooting diagnosis produced by FIX, including the recommended first action, possible causes, troubleshooting steps, and research sources.",
+  "description": "Structured troubleshooting diagnosis produced by FIX, including the recommended first action, possible causes, troubleshooting steps, follow-up questions, parts, service requirements, and research sources.",
   "properties": {
     "diagnosis": {
       "type": "string",
       "title": "Troubleshooting Diagnosis",
-      "description": "The complete FIX diagnosis and troubleshooting result.",
+      "description": "The complete troubleshooting result produced by FIX.",
       "template": "{{links.apiDefaultDatasetUrl}}/items"
     }
   }
