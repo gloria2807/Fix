@@ -239,6 +239,191 @@ The remaining information provides context, possible causes, follow-up questions
 
 ---
 
+# Run the Actor
+
+FIX can be run directly from the Apify Console or through the Apify API.
+
+## Option 1: Run from the Apify Console
+
+1. Open the FIX Actor on the Apify Store.
+2. Click **Try for free** or **Start**.
+3. Enter a problem description.
+4. Optionally provide the equipment type and model.
+5. Optionally provide an image of the equipment.
+6. Click **Start**.
+7. FIX will:
+   - identify the equipment and relevant symptoms
+   - plan targeted research
+   - retrieve relevant web sources
+   - evaluate the evidence
+   - generate a structured troubleshooting diagnosis
+8. When the run completes, the diagnosis is available in the Actor output and Dataset.
+
+### Example input
+
+```json
+{
+  "problem": "My thermal printer is printing blank receipts.",
+  "equipment": "thermal_printer",
+  "model": "",
+  "location": "Lagos, Nigeria"
+}
+````
+
+### Example result
+
+FIX returns a structured diagnosis containing:
+
+* Equipment
+* Model
+* Confidence
+* Summary
+* Likely issues
+* First action
+* Troubleshooting steps
+* Follow-up questions
+* Parts that may be required
+* Whether professional service may be needed
+* Research sources
+
+The most important result is the recommended `firstAction`.
+
+For example:
+
+> Check the thermal paper roll and its installation.
+
+---
+
+## Option 2: Run through the Apify API
+
+FIX can also be called programmatically using the Apify API.
+
+Example:
+
+```bash
+curl -X POST \
+  "https://api.apify.com/v2/acts/YOUR_USERNAME~fix-troubleshooter/runs?token=YOUR_APIFY_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "problem": "My thermal printer is printing blank receipts.",
+    "equipment": "thermal_printer",
+    "model": "",
+    "location": "Lagos, Nigeria"
+  }'
+```
+
+Replace `YOUR_USERNAME` and `YOUR_APIFY_TOKEN` with your Apify account details.
+
+The returned run ID can then be used to monitor the Actor run and retrieve its Dataset output.
+
+---
+
+## Option 3: Run locally
+
+Clone the repository and install the Actor dependencies:
+
+```bash
+git clone https://github.com/gloria2807/fix.git
+cd fix/actor/Fix
+npm install
+```
+
+Set the required environment variables:
+
+```text
+APIFY_TOKEN=your_apify_token
+```
+
+Then run the Actor:
+
+```bash
+apify run
+```
+
+For a cloud deployment:
+
+```bash
+apify push
+```
+
+The Actor can then be run from the Apify Console or through the Apify API.
+
+---
+
+# Web App Demo
+
+FIX also includes a web interface designed to make the troubleshooting workflow simple for everyday users.
+
+The interface lets a user describe a problem and optionally show the equipment with an image.
+
+## 1. Describe the problem
+
+![FIX home screen](./screenshots/fix-home.jpeg)
+
+The user starts with a simple question:
+
+> **Something broken? Show us.**
+
+There is no need to understand the underlying research workflow or Apify infrastructure.
+
+---
+
+## 2. Show FIX the equipment
+
+![FIX image upload](./screenshots/fix-image-upload.png)
+
+Users can optionally provide a photo of the equipment.
+
+FIX can use the image to identify useful visual information such as:
+
+* Equipment type
+* Model information
+* Error codes
+* Visible symptoms
+* Relevant physical clues
+
+The image is compressed in the browser before being sent to the Actor.
+
+---
+
+## 3. FIX researches the problem
+
+![FIX research progress](./screenshots/fix-research.png)
+
+After the request is submitted, FIX runs its troubleshooting workflow.
+
+The Actor:
+
+1. Identifies the problem context.
+2. Plans targeted research.
+3. Retrieves relevant sources.
+4. Evaluates the available evidence.
+5. Produces the diagnosis.
+
+Progress is stored in the Apify Key-Value Store and surfaced by the web application.
+
+---
+
+## 4. Get a practical first action
+
+![FIX diagnosis](./screenshots/fix-diagnosis.png)
+
+Instead of returning a page of search results, FIX presents the most useful starting point:
+
+> **What should I do next?**
+
+The result includes the recommended first action, likely causes, troubleshooting steps, follow-up questions and supporting sources.
+
+---
+
+# Project Links
+
+* **Live Demo:** [https://fix.example.com](Demo Video)
+* **Apify Actor:** [https://console.apify.com/actors/xb7jVanfooeAYhD03/info/readme?build=latest](Fix: AI Troubshooting Agent)
+* **GitHub Repository:** [https://github.com/gloria2807/fix](FIX repo)
+
+---
+
 # Safety is part of the product
 
 FIX is designed around a simple rule:
