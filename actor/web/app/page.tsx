@@ -8,50 +8,186 @@ import {
     Mic,
 } from 'lucide-react';
 
+import AgentProgress from '@/components/AgentProgress';
+
+type Progress = {
+    stage: string;
+    sources: number;
+};
+
 export default function Home() {
-    const [problem, setProblem] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [problem, setProblem] =
+        useState('');
+
+    const [loading, setLoading] =
+        useState(false);
+
+    const [result, setResult] =
+        useState<any>(null);
+
+    const [error, setError] =
+        useState('');
+
+    const [agentProgress, setAgentProgress] =
+        useState<Progress>({
+            stage: 'starting',
+            sources: 0,
+        });
 
     async function submit() {
-        if (!problem.trim()) return;
+        if (!problem.trim() || loading) {
+            return;
+        }
 
         setLoading(true);
+        setResult(null);
+        setError('');
+
+        setAgentProgress({
+            stage: 'starting',
+            sources: 0,
+        });
 
         try {
-            const response = await fetch('/api/troubleshoot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    problem,
-                    equipment: 'unknown',
-                    location: 'Lagos, Nigeria',
-                }),
-            });
+            /*
+             * Start the FIX Actor.
+             *
+             * This request returns the run ID
+             * instead of waiting for the Actor
+             * to finish.
+             */
 
-            const data = await response.json();
+            const response = await fetch(
+                '/api/troubleshoot',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+                    },
+                    body: JSON.stringify({
+                        problem,
+                        equipment:
+                            'unknown',
+                        location:
+                            'Lagos, Nigeria',
+                    }),
+                },
+            );
+
+            const data =
+                await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Something went wrong');
+                throw new Error(
+                    data.error ||
+                        'FIX could not start.',
+                );
             }
 
-            setResult(data);
+            const runId = data.runId;
+
+            if (!runId) {
+                throw new Error(
+                    'FIX did not return a run ID.',
+                );
+            }
+
+            /*
+             * Poll the lightweight progress
+             * endpoint.
+             */
+
+            while (true) {
+    const statusResponse =
+        await fetch(
+            `/api/troubleshoot/${runId}`,
+            {
+                cache: 'no-store',
+            },
+        );
+
+                const status =
+                    await statusResponse.json();
+
+                if (!statusResponse.ok) {
+                    throw new Error(
+                        status.error ||
+                            'Unable to check FIX progress.',
+                    );
+                }
+
+                if (status.progress) {
+                    setAgentProgress(
+                        status.progress,
+                    );
+                }
+
+                if (
+                    status.status ===
+                    'SUCCEEDED'
+                ) {
+                    setResult(
+                        status.result,
+                    );
+
+                    break;
+                }
+
+                if (
+                    status.status ===
+                        'FAILED' ||
+                    status.status ===
+                        'ABORTED' ||
+                    status.status ===
+                        'TIMED-OUT'
+                ) {
+                    throw new Error(
+                        'FIX could not complete the diagnosis.',
+                    );
+                }
+
+                await new Promise(
+                    (resolve) =>
+                        setTimeout(
+                            resolve,
+                            700,
+                        ),
+                );
+            }
         } catch (error) {
-            console.error(error);
+            console.error(
+                'FIX ERROR:',
+                error,
+            );
+
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'Something went wrong.',
+            );
         } finally {
             setLoading(false);
         }
     }
+
+    /*
+     * ----------------------------------------
+     * RESULT SCREEN
+     * ----------------------------------------
+     */
 
     if (result) {
         return (
             <main className="min-h-screen bg-[#0b0b0b] text-white">
                 <div className="mx-auto max-w-4xl px-6 py-12">
                     <button
-                        onClick={() => setResult(null)}
-                        className="mb-16 text-sm text-white/50 hover:text-white"
+                        onClick={() => {
+                            setResult(null);
+                            setProblem('');
+                            setError('');
+                        }}
+                        className="mb-16 text-sm text-white/50 transition-colors hover:text-white"
                     >
                         ← New problem
                     </button>
@@ -78,49 +214,140 @@ export default function Home() {
                         </h2>
                     </section>
 
-                    <section className="mt-8">
-                        <h2 className="text-xl font-medium">
-                            Troubleshooting
-                        </h2>
+                    {result.steps?.length >
+                        0 && (
+                        <section className="mt-8">
+                            <h2 className="text-xl font-medium">
+                                Troubleshooting
+                            </h2>
 
-                        <div className="mt-5 space-y-3">
-                            {result.steps?.map(
-                                (step: string, index: number) => (
-                                    <div
-                                        key={index}
-                                        className="flex gap-4 rounded-2xl border border-white/10 p-5"
-                                    >
-                                        <span className="text-white/30">
-                                            {String(index + 1).padStart(
-                                                2,
-                                                '0',
-                                            )}
-                                        </span>
+                            <div className="mt-5 space-y-3">
+                                {result.steps.map(
+                                    (
+                                        step: string,
+                                        index: number,
+                                    ) => (
+                                        <div
+                                            key={
+                                                index
+                                            }
+                                            className="flex gap-4 rounded-2xl border border-white/10 p-5"
+                                        >
+                                            <span className="text-white/30">
+                                                {String(
+                                                    index +
+                                                        1,
+                                                ).padStart(
+                                                    2,
+                                                    '0',
+                                                )}
+                                            </span>
 
-                                        <p className="text-white/70">
-                                            {step}
-                                        </p>
-                                    </div>
-                                ),
-                            )}
-                        </div>
-                    </section>
+                                            <p className="text-white/70">
+                                                {
+                                                    step
+                                                }
+                                            </p>
+                                        </div>
+                                    ),
+                                )}
+                            </div>
+                        </section>
+                    )}
 
-                    {result.questions?.length > 0 && (
+                    {result.questions
+                        ?.length >
+                        0 && (
                         <section className="mt-12">
                             <h2 className="text-xl font-medium">
                                 I need to know one more thing
                             </h2>
 
                             <p className="mt-4 text-lg text-white/60">
-                                {result.questions[0]}
+                                {
+                                    result
+                                        .questions[0]
+                                }
                             </p>
+                        </section>
+                    )}
+
+                    {result.sources
+                        ?.length >
+                        0 && (
+                        <section className="mt-12">
+                            <h2 className="text-xl font-medium">
+                                Sources
+                            </h2>
+
+                            <div className="mt-5 space-y-2">
+                                {result.sources.map(
+                                    (
+                                        source: any,
+                                        index: number,
+                                    ) => (
+                                        <a
+                                            key={
+                                                source.url ||
+                                                index
+                                            }
+                                            href={
+                                                source.url
+                                            }
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="block rounded-xl border border-white/10 p-4 transition-colors hover:bg-white/4"
+                                        >
+                                            <p className="text-sm text-white/70">
+                                                {
+                                                    source.title
+                                                }
+                                            </p>
+
+                                            <p className="mt-1 text-xs text-white/30">
+                                                {
+                                                    source.url
+                                                }
+                                            </p>
+                                        </a>
+                                    ),
+                                )}
+                            </div>
                         </section>
                     )}
                 </div>
             </main>
         );
     }
+
+    /*
+     * ----------------------------------------
+     * AGENT PROGRESS SCREEN
+     * ----------------------------------------
+     */
+
+    if (loading) {
+        return (
+            <main className="min-h-screen bg-[#0b0b0b] text-white">
+                <div className="mx-auto flex min-h-screen max-w-5xl items-center px-6">
+                    <AgentProgress
+                        problem={
+                            problem
+                        }
+                        progress={
+                            agentProgress
+                        }
+                    />
+                </div>
+            </main>
+        );
+    }
+
+    /*
+     * ----------------------------------------
+     * HOME SCREEN
+     * ----------------------------------------
+     */
 
     return (
         <main className="min-h-screen bg-[#0b0b0b] text-white">
@@ -145,48 +372,110 @@ export default function Home() {
                     </h1>
 
                     <p className="mt-7 max-w-xl text-center text-lg leading-8 text-white/45">
-                        Tell FIX what's wrong. We'll identify the problem,
-                        research it and show you what to try next.
+                        Tell FIX what's wrong.
+                        We'll identify the
+                        problem, research it
+                        and show you what to
+                        try next.
                     </p>
 
                     <div className="mt-12 w-full max-w-2xl rounded-4xl border border-white/10 bg-white/4 p-3 shadow-2xl">
                         <textarea
                             value={problem}
-                            onChange={(event) =>
-                                setProblem(event.target.value)
+                            onChange={(
+                                event,
+                            ) =>
+                                setProblem(
+                                    event
+                                        .target
+                                        .value,
+                                )
                             }
                             placeholder="My generator starts but shuts down after 30 seconds..."
                             className="min-h-36 w-full resize-none bg-transparent p-5 text-lg outline-none placeholder:text-white/20"
+                            disabled={
+                                loading
+                            }
                         />
 
                         <div className="flex items-center justify-between border-t border-white/10 px-3 pt-3">
                             <div className="flex gap-2">
-                                <button className="rounded-full p-3 text-white/40 hover:bg-white/10 hover:text-white">
-                                    <Camera size={20} />
+                                <button
+                                    type="button"
+                                    className="rounded-full p-3 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+                                >
+                                    <Camera
+                                        size={
+                                            20
+                                        }
+                                    />
                                 </button>
 
-                                <button className="rounded-full p-3 text-white/40 hover:bg-white/10 hover:text-white">
-                                    <ImageIcon size={20} />
+                                <button
+                                    type="button"
+                                    className="rounded-full p-3 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+                                >
+                                    <ImageIcon
+                                        size={
+                                            20
+                                        }
+                                    />
                                 </button>
 
-                                <button className="rounded-full p-3 text-white/40 hover:bg-white/10 hover:text-white">
-                                    <Mic size={20} />
+                                <button
+                                    type="button"
+                                    className="rounded-full p-3 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+                                >
+                                    <Mic
+                                        size={
+                                            20
+                                        }
+                                    />
                                 </button>
                             </div>
 
                             <button
-                                onClick={submit}
-                                disabled={loading || !problem.trim()}
-                                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black disabled:opacity-20"
+                                onClick={
+                                    submit
+                                }
+                                disabled={
+                                    loading ||
+                                    !problem.trim()
+                                }
+                                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black transition-opacity disabled:opacity-20"
                             >
-                                <ArrowUp size={20} />
+                                <ArrowUp
+                                    size={
+                                        20
+                                    }
+                                />
                             </button>
                         </div>
                     </div>
 
+                    {error && (
+                        <div className="mt-6 w-full max-w-2xl rounded-2xl border border-white/10 bg-white/3 p-4">
+                            <p className="text-sm text-white/60">
+                                {error}
+                            </p>
+
+                            <button
+                                onClick={() =>
+                                    setError(
+                                        '',
+                                    )
+                                }
+                                className="mt-3 text-sm text-white underline underline-offset-4"
+                            >
+                                Try again
+                            </button>
+                        </div>
+                    )}
+
                     <div className="mt-6 text-xs text-white/25">
-                        Generators · Printers · Freezers · Inverters
-                    </div>
+    Generators · Thermal printers · Freezers ·
+    Refrigerators · Inverters
+</div>
                 </div>
             </div>
         </main>

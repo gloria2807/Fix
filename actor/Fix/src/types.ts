@@ -18,7 +18,12 @@ export interface ResearchSource {
     title: string;
     url: string;
     snippet: string;
-    sourceType: 'manual' | 'manufacturer' | 'repair' | 'product' | 'local';
+    sourceType:
+        | 'manual'
+        | 'manufacturer'
+        | 'repair'
+        | 'product'
+        | 'local';
 }
 
 export interface Diagnosis {

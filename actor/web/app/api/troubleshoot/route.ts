@@ -5,73 +5,85 @@ const client = new ApifyClient({
     token: process.env.APIFY_TOKEN,
 });
 
-export async function POST(request: Request) {
+export async function POST(
+    request: Request,
+) {
     try {
         const body = await request.json();
 
         if (!body.problem?.trim()) {
             return NextResponse.json(
-                { error: 'Problem description is required.' },
+                {
+                    error:
+                        'Problem description is required.',
+                },
                 { status: 400 },
             );
         }
 
         if (!process.env.APIFY_TOKEN) {
-            throw new Error('APIFY_TOKEN is not configured.');
-        }
-
-        if (!process.env.FIX_ACTOR_ID) {
-            throw new Error('FIX_ACTOR_ID is not configured.');
-        }
-
-        console.log('Starting FIX Actor:', process.env.FIX_ACTOR_ID);
-
-        const run = await client
-            .actor(process.env.FIX_ACTOR_ID)
-            .call({
-                problem: body.problem,
-                equipment: body.equipment ?? 'unknown',
-                model: body.model ?? '',
-                location: body.location ?? '',
-                imageUrl: body.imageUrl ?? '',
-            });
-
-        console.log('FIX Actor finished:', {
-            status: run.status,
-            runId: run.id,
-            datasetId: run.defaultDatasetId,
-        });
-
-        if (run.status !== 'SUCCEEDED') {
             throw new Error(
-                `FIX Actor finished with status: ${run.status}`,
+                'APIFY_TOKEN is not configured.',
             );
         }
 
-        if (!run.defaultDatasetId) {
-            throw new Error('FIX Actor did not return a dataset.');
+        if (!process.env.FIX_ACTOR_ID) {
+            throw new Error(
+                'FIX_ACTOR_ID is not configured.',
+            );
         }
 
-        const { items } = await client
-            .dataset(run.defaultDatasetId)
-            .listItems();
+        console.log(
+            'Starting FIX Actor:',
+            process.env.FIX_ACTOR_ID,
+        );
 
-        console.log('FIX dataset items:', items.length);
+        /*
+         * IMPORTANT:
+         *
+         * start() starts the Actor and returns
+         * immediately.
+         *
+         * We do NOT use call() here because
+         * call() waits for the entire Actor.
+         */
 
-        if (!items.length) {
-            throw new Error('FIX Actor returned no diagnosis.');
-        }
+        const run = await client
+            .actor(process.env.FIX_ACTOR_ID)
+            .start({
+                problem: body.problem,
+                equipment:
+                    body.equipment ?? 'unknown',
+                model: body.model ?? '',
+                location:
+                    body.location ?? '',
+                imageUrl:
+                    body.imageUrl ?? '',
+            });
 
-        return NextResponse.json(items[0]);
+        console.log(
+            'FIX Actor started:',
+            {
+                runId: run.id,
+                status: run.status,
+            },
+        );
+
+        return NextResponse.json({
+            runId: run.id,
+        });
     } catch (error) {
-        console.error('FIX API ERROR:', error);
+        console.error(
+            'FIX API ERROR:',
+            error,
+        );
 
         return NextResponse.json(
             {
                 error:
                     error instanceof Error
                         ? error.message
-                        : 'FIX could not complete the diagnosis.',
+                        : 'FIX could not start the diagnosis.',
             },
             { status: 500 },
         );

@@ -1,81 +1,50 @@
 import { ApifyClient } from 'apify-client';
-import type { ResearchSource } from './types.js';
 
-interface OrganicResult {
+import type {
+    ResearchSource,
+} from './types.js';
+
+interface SearchResult {
+    type?: string;
     title?: string;
-    url?: string;
-    description?: string;
-    position?: number;
-}
-
-interface SearchPage {
-    organicResults?: OrganicResult[];
+    link?: string;
+    snippet?: string;
+    visible_link?: string;
 }
 
 const client = new ApifyClient({
     token: process.env.APIFY_TOKEN,
 });
 
+const RESEARCH_ACTOR =
+    'apidojo/google-search-scraper';
+
 export async function researchWeb(
     queries: string[],
 ): Promise<ResearchSource[]> {
-    const searchQueries = queries
+    const searchTerms = queries
         .map((query) => query.trim())
         .filter(Boolean)
-        .join('\n');
+        .slice(0, 2);
 
-    if (!searchQueries) {
+    if (searchTerms.length === 0) {
         return [];
     }
 
     const run = await client
-        .actor('apify/google-search-scraper')
+        .actor(RESEARCH_ACTOR)
         .call({
-            queries: searchQueries,
-            maxPagesPerQuery: 1,
-
+            searchTerms,
             countryCode: 'ng',
-            searchLanguages: 'en',
             languageCode: 'en',
-
+            maxItems: 10,
+            maxPagesPerQuery: 1,
             mobileResults: false,
-            includeUnfilteredResults: false,
-
-            aiOverview: {
-                scrapeFullAiOverview: false,
-            },
-
-            aiModeSearch: {
-                enableAiMode: false,
-            },
-
-            geminiSearch: {
-                enableGemini: false,
-            },
-
-            perplexitySearch: {
-                enablePerplexity: false,
-                returnImages: false,
-                returnRelatedQuestions: false,
-            },
-
-            chatGptSearch: {
-                enableChatGpt: false,
-            },
-
-            copilotSearch: {
-                enableCopilot: false,
-            },
-
-            maximumLeadsEnrichmentRecords: 0,
-
-            websiteContentScraper: {
-                enable: false,
-            },
-
-            saveHtml: false,
-            saveHtmlToKeyValueStore: false,
         });
+
+    if (!run.defaultDatasetId) {
+        return [];
+    }
 
     const { items } = await client
         .dataset(run.defaultDatasetId)
@@ -83,48 +52,56 @@ export async function researchWeb(
 
     const sources: ResearchSource[] = [];
 
-    for (const item of items as SearchPage[]) {
-        for (const result of item.organicResults ?? []) {
-            if (!result.title || !result.url) {
-                continue;
-            }
-
-            const text = `${result.title} ${result.description ?? ''}`.toLowerCase();
-
-            let sourceType: ResearchSource['sourceType'] = 'repair';
-
-            if (
-                text.includes('manual') ||
-                text.includes('user guide') ||
-                text.includes('owner guide')
-            ) {
-                sourceType = 'manual';
-            } else if (
-                text.includes('manufacturer') ||
-                text.includes('support') ||
-                text.includes('official')
-            ) {
-                sourceType = 'manufacturer';
-            } else if (
-                text.includes('parts') ||
-                text.includes('replacement')
-            ) {
-                sourceType = 'product';
-            }
-
-            sources.push({
-                title: result.title,
-                url: result.url,
-                snippet: result.description ?? '',
-                sourceType,
-            });
+    for (const item of items as SearchResult[]) {
+        if (!item.title || !item.link) {
+            continue;
         }
+
+        const text = (
+            `${item.title} ${
+                item.snippet ?? ''
+            }`
+        ).toLowerCase();
+
+        let sourceType: ResearchSource['sourceType'] =
+            'repair';
+
+        if (
+            text.includes('manual') ||
+            text.includes('user guide') ||
+            text.includes('owner guide')
+        ) {
+            sourceType = 'manual';
+        } else if (
+            text.includes('manufacturer') ||
+            text.includes('support') ||
+            text.includes('official')
+        ) {
+            sourceType = 'manufacturer';
+        } else if (
+            text.includes('parts') ||
+            text.includes('replacement')
+        ) {
+            sourceType = 'product';
+        }
+
+        sources.push({
+            title: item.title,
+            url: item.link,
+            snippet:
+                item.snippet ?? '',
+            sourceType,
+        });
     }
 
-    // Remove duplicate URLs.
     const unique = Array.from(
         new Map(
-            sources.map((source) => [source.url, source]),
+            sources.map(
+                (source) => [
+                    source.url,
+                    source,
+                ],
+            ),
         ).values(),
     );
 
