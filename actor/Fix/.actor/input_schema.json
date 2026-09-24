@@ -1,0 +1,53 @@
+{
+  "title": "FIX Troubleshooter Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "problem": {
+      "title": "Problem description",
+      "type": "string",
+      "description": "Describe what is wrong with the equipment.",
+      "editor": "textarea",
+      "default": "My thermal printer is printing blank receipts."
+    },
+    "equipment": {
+      "title": "Equipment type",
+      "type": "string",
+      "description": "Select the equipment type if known.",
+      "enum": [
+        "generator",
+        "inverter",
+        "thermal_printer",
+        "freezer",
+        "refrigerator",
+        "unknown"
+      ],
+      "default": "thermal_printer",
+      "editor": "select"
+    },
+    "model": {
+      "title": "Equipment model",
+      "type": "string",
+      "description": "Enter the brand and model if known.",
+      "default": "",
+      "editor": "textfield"
+    },
+    "location": {
+      "title": "Location",
+      "type": "string",
+      "description": "City or region where the equipment is located.",
+      "default": "Lagos, Nigeria",
+      "editor": "textfield"
+    },
+    "imageUrl": {
+      "title": "Image URL",
+      "type": "string",
+      "description": "Optional public URL of an image of the equipment.",
+      "default": "",
+      "editor": "textfield"
+    }
+  },
+  "required": [
+    "problem"
+  ]
+}

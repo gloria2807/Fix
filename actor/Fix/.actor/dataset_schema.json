@@ -1,0 +1,38 @@
+{
+  "actorSpecification": 1,
+  "fields": {
+    "equipment": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "likelyIssues": {
+      "type": "array"
+    },
+    "firstAction": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "array"
+    },
+    "questions": {
+      "type": "array"
+    },
+    "parts": {
+      "type": "array"
+    },
+    "serviceNeeded": {
+      "type": "boolean"
+    },
+    "sources": {
+      "type": "array"
+    }
+  }
+}
