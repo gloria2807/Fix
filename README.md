@@ -414,11 +414,14 @@ Instead of returning a page of search results, FIX presents the most useful star
 
 The result includes the recommended first action, likely causes, troubleshooting steps, follow-up questions and supporting sources.
 
+Check out the video demo:
+![FIX demo](./screenshots/FIX-Product-Film.mp4)
+
 ---
 
 # Project Links
 
-* **Live Demo:** [https://fix.example.com](Demo Video)
+* **Live Demo:** [https://drive.google.com/file/d/1RmwEqZifbQV1c01rM4IcY1GuF_N8nbdu/view](Demo Video)
 * **Apify Actor:** [https://console.apify.com/actors/xb7jVanfooeAYhD03/info/readme?build=latest](Fix: AI Troubshooting Agent)
 * **GitHub Repository:** [https://github.com/gloria2807/fix](FIX repo)
 
