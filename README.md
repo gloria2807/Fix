@@ -418,7 +418,7 @@ The result includes the recommended first action, likely causes, troubleshooting
 
 Check out FIX in action:
 
-<video src="https://raw.githubusercontent.com/gloria2807/fix/main/screenshots/FIX-Product-Film.mp4" controls width="100%"></video>
+<video src="./screenshots/FIX-Product-Film.mp4" controls width="100%"></video>
 ---
 
 # Project Links
