@@ -42,7 +42,9 @@
     "imageData": {
       "title": "Image data",
       "type": "string",
-      "description": "Temporary image data supplied by the FIX web app."
+      "description": "Temporary image data supplied by the FIX web app.",
+      "editor": "textarea",
+      "default": ""
     }
   },
   "required": [
