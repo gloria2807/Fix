@@ -1,117 +1,166 @@
-# TypeScript Crawlee & CheerioCrawler Actor Template
+# FIX Equipment Troubleshooter
 
-<!-- This is an Apify template readme -->
+**Something broken? Show us.**
 
-This template example was built with [Crawlee](https://crawlee.dev/) to scrape data from a website using [Cheerio](https://cheerio.js.org/) wrapped into [CheerioCrawler](https://crawlee.dev/api/cheerio-crawler/class/CheerioCrawler).
+FIX is an AI-powered troubleshooting Actor that helps people diagnose everyday equipment problems using web research and practical, step-by-step guidance.
 
-## Quick Start
+Instead of relying only on a model's existing knowledge, FIX researches relevant troubleshooting guides, manuals, and technical sources through Apify, then uses that information to produce a practical diagnosis.
 
-Once you've installed the dependencies, start the Actor:
+## What FIX does
 
-```bash
-apify run
+Give FIX:
+
+* A description of the problem
+* The equipment type
+* The model, if known
+* A location, if relevant
+
+FIX then:
+
+1. Understands the equipment and reported symptoms.
+2. Searches relevant technical and troubleshooting sources.
+3. Collects the most relevant results.
+4. Uses AI to reason over the researched information.
+5. Identifies likely causes.
+6. Recommends the safest useful first action.
+7. Provides additional troubleshooting steps.
+8. Identifies potential parts that may be needed.
+9. Indicates when professional service may be required.
+10. Returns the research sources used.
+
+## Supported equipment
+
+The current version supports:
+
+* Generators
+* Inverters
+* Thermal printers
+* Freezers
+* Refrigerators
+
+More equipment categories can be added as FIX evolves.
+
+## Input
+
+Example:
+
+```json
+{
+  "problem": "My thermal printer is printing blank receipts.",
+  "equipment": "thermal_printer",
+  "model": "",
+  "location": "Lagos, Nigeria"
+}
 ```
 
-Once your Actor is ready, you can push it to the Apify Console:
+### Input fields
 
-```bash
-apify login # first, you need to log in if you haven't already done so
+| Field       | Required | Description                  |
+| ----------- | -------- | ---------------------------- |
+| `problem`   | Yes      | Description of what is wrong |
+| `equipment` | No       | Equipment type               |
+| `model`     | No       | Equipment model              |
+| `location`  | No       | City or region               |
+| `imageUrl`  | No       | Public image URL             |
 
-apify push
+## Output
+
+FIX returns a structured diagnosis containing:
+
+* Equipment
+* Model
+* Confidence
+* Diagnosis summary
+* Likely issues
+* First troubleshooting action
+* Step-by-step troubleshooting
+* Follow-up questions
+* Potential parts
+* Whether professional service may be required
+* Research sources
+
+Example:
+
+```json
+{
+  "equipment": "thermal printer",
+  "model": "",
+  "confidence": 0.8,
+  "summary": "Your thermal printer is printing blank receipts, which could be due to incorrect paper loading, issues with the thermal paper itself, or a dirty print head.",
+  "likelyIssues": [
+    "Thermal paper loaded incorrectly",
+    "Defective or incorrect thermal paper",
+    "Dirty print head"
+  ],
+  "firstAction": "Check the thermal paper roll and its installation.",
+  "steps": [
+    "Turn off the printer.",
+    "Open the printer cover.",
+    "Remove the paper roll.",
+    "Check that the paper is thermal paper.",
+    "Reinstall the roll with the thermal side facing the print head."
+  ],
+  "questions": [
+    "Did you recently replace the paper roll?"
+  ],
+  "parts": [
+    "Thermal paper roll"
+  ],
+  "serviceNeeded": false,
+  "sources": []
+}
 ```
 
-## Project Structure
+## Safety
 
-```text
-.actor/
-├── actor.json # Actor config: name, version, env vars, runtime settings
-├── dataset_schema.json # Structure and representation of data produced by an Actor
-├── input_schema.json # Input validation & Console form definition
-└── output_schema.json # Specifies where an Actor stores its output
-src/
-└── main.ts # Actor entry point and orchestrator
-storage/ # Local storage (mirrors Cloud during development)
-├── datasets/ # Output items (JSON objects)
-├── key_value_stores/ # Files, config, INPUT
-└── request_queues/ # Pending crawl requests
-Dockerfile # Container image definition
-```
+FIX prioritizes safe troubleshooting.
 
-For more information, see the [Actor definition](https://docs.apify.com/platform/actors/development/actor-definition) documentation.
+It should not instruct users to perform dangerous electrical, fuel, refrigeration, high-voltage, or mechanical repairs. Where a problem may require specialist work, FIX can recommend professional service instead.
 
 ## How it works
 
-This code is a TypeScript script that uses Cheerio to scrape data from a website. It then stores the website titles in a dataset.
+FIX uses Apify as the orchestration and research layer.
 
-- The crawler starts with URLs provided from the input `startUrls` field defined by the input schema. Number of scraped pages is limited by `maxPagesPerCrawl` field from the input schema.
-- The crawler uses `requestHandler` for each URL to extract the data from the page with the Cheerio library and to save the title and URL of each page to the dataset. It also logs out each result that is being saved.
+```text
+User problem
+     ↓
+FIX Actor
+     ↓
+Apify research Actor
+     ↓
+Technical sources
+     ↓
+AI reasoning
+     ↓
+Structured troubleshooting result
+```
 
-## What's included
+This allows FIX to research the specific problem rather than relying solely on static model knowledge.
 
-- **[Apify SDK](https://docs.apify.com/sdk/js)** - toolkit for building [Actors](https://apify.com/actors)
-- **[Crawlee](https://crawlee.dev/)** - web scraping and browser automation library
-- **[Input schema](https://docs.apify.com/platform/actors/development/input-schema)** - define and easily validate a schema for your Actor's input
-- **[Dataset](https://docs.apify.com/sdk/python/docs/concepts/storages#working-with-datasets)** - store structured data where each object stored has the same attributes
-- **[Cheerio](https://cheerio.js.org/)** - a fast, flexible & elegant library for parsing and manipulating HTML and XML
-- **[Proxy configuration](https://docs.apify.com/platform/proxy)** - rotate IP addresses to prevent blocking
+## Use cases
 
-## Resources
+FIX can help with problems such as:
 
-- [Quick Start](https://docs.apify.com/platform/actors/development/quick-start) guide for building your first Actor
-- [Video tutorial](https://www.youtube.com/watch?v=yTRHomGg9uQ) on building a scraper using CheerioCrawler
-- [Written tutorial](https://docs.apify.com/academy/web-scraping-for-beginners/challenge) on building a scraper using CheerioCrawler
-- [Web scraping with Cheerio in 2023](https://blog.apify.com/web-scraping-with-cheerio/)
-- How to [scrape a dynamic page](https://blog.apify.com/what-is-a-dynamic-page/) using Cheerio
-- [Integration with Zapier](https://apify.com/integrations), Make, Google Drive and others
-- [Video guide on getting data using Apify API](https://www.youtube.com/watch?v=ViYYDHSBAKM)
+* A thermal printer producing blank receipts
+* A generator starting and shutting down
+* A freezer running without cooling
+* An inverter showing an unexpected error
+* A refrigerator behaving abnormally
 
-## Creating Actors with templates
+## Development
 
-[How to create Apify Actors with web scraping code templates](https://www.youtube.com/watch?v=u-i-Korzf8w)
+The Actor is built with:
 
+* TypeScript
+* Apify SDK
+* Apify Actors
+* Apify research infrastructure
+* AI via the Apify-supported model interface
 
-## Getting started
+## Status
 
-For complete information [see this article](https://docs.apify.com/platform/actors/development#build-actor-at-apify-console). In short, you will:
+FIX is currently an early working version. The core troubleshooting pipeline is functional, with additional capabilities such as image-based equipment identification and interactive follow-up diagnosis planned for future versions.
 
-1. Build the Actor
-2. Run the Actor
+---
 
-## Pull the Actor for local development
-
-If you would like to develop locally, you can pull the existing Actor from Apify console using Apify CLI:
-
-1. Install `apify-cli`
-
-    **Using Homebrew**
-
-    ```bash
-    brew install apify-cli
-    ```
-
-    **Using NPM**
-
-    ```bash
-    npm -g install apify-cli
-    ```
-
-2. Pull the Actor by its unique `<ActorId>`, which is one of the following:
-    - unique name of the Actor to pull (e.g. "apify/hello-world")
-    - or ID of the Actor to pull (e.g. "E2jjCZBezvAZnX8Rb")
-
-    You can find both by clicking on the Actor title at the top of the page, which will open a modal containing both Actor unique name and Actor ID.
-
-    This command will copy the Actor into the current directory on your local machine.
-
-    ```bash
-    apify pull <ActorId>
-    ```
-
-## Documentation reference
-
-To learn more about Apify and Actors, take a look at the following resources:
-
-- [Apify SDK for JavaScript documentation](https://docs.apify.com/sdk/js)
-- [Apify SDK for Python documentation](https://docs.apify.com/sdk/python)
-- [Apify Platform documentation](https://docs.apify.com/platform)
-- [Join our developer community on Discord](https://discord.com/invite/jyEM2PRvMU)
+**FIX — Something broken? Show us.**
