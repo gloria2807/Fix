@@ -49,7 +49,7 @@ The problem is particularly meaningful in an economy where small businesses depe
 
 Nigeria's latest joint NBS/SMEDAN MSME survey reported **39.65 million MSMEs**, with **96.9% classified as micro-enterprises**. MSMEs contributed **46.31% of national GDP** and accounted for **87.9% of employment** in the survey period.
 
-That means equipment problems are not always an inconvenience.
+That means equipment problems matter a lot.
 
 For a small shop, a failed printer can interrupt sales.
 
